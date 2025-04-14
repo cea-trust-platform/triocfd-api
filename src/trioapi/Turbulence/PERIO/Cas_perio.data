@@ -1,0 +1,100 @@
+Dimension 2
+Pb_hydraulique_turbulent pb
+
+Domaine dom
+Lire_med { domain dom file diffuseur_perio.med }
+
+VEFPreP1b dis
+
+Schema_Euler_implicite sch
+Lire sch
+{
+	tinit 0
+	dt_impr 1e-6
+	facsec 20
+	facsec_max 20
+	solveur implicite { solveur gmres { diag nb_it_max 3 seuil 1e-12 impr } }
+	precision_impr 8
+	tmax 1000
+	seuil_statio -1
+}
+
+Associer pb dom
+Associer pb sch
+
+Discretiser pb dis
+
+Lire pb
+{
+	Fluide_incompressible
+	{
+		mu	champ_uniforme 1 0.0149
+		rho	champ_uniforme 1 1000
+	}
+	Navier_Stokes_turbulent
+	{
+		solveur_pression	PETSC Cholesky { }
+		convection		{ MUSCL }
+		diffusion		{ }
+		conditions_initiales	{ vitesse champ_uniforme 2 0.2682 0 }
+		conditions_limites	{
+					PerioX	periodique
+					Haut	paroi_fixe
+					Bas	paroi_fixe
+					}
+		modele_turbulence k_epsilon
+					{
+					transport_k_epsilon
+						{
+						with_nu			yes
+						convection		{ MUSCL }
+						diffusion		{ }
+						conditions_initiales 	{ k_eps field_uniform_keps_from_ud { U 0.2682 D 2 } }
+						conditions_limites	{
+									PerioX	periodique
+									Haut	paroi_fixe
+									Bas	paroi_fixe
+									}
+						sources			{ source_transport_k_eps { C1_eps 1.44 C2_eps 1.92 } }
+						}
+					Prandtl_k 1
+					Prandtl_eps 1.3
+					modele_fonc_bas_Reynolds Launder_Sharma { }
+					turbulence_paroi negligeable
+					}
+		sources			{ canal_perio { bord PerioX } }
+		ecrire_fichier_xyz_valeur { fields 2 vitesse k_eps boundaries 1 PerioX dt 1e6 }
+	}
+
+ 	Postraitement
+	{
+		definition_champs	{
+					nut_max reduction_0D { methode max source refChamp { pb_champ pb viscosite_turbulente } }
+					}
+		sondes			{
+					nut_max	nut_max	periode 1e-6 numero_elem_sur_maitre 0
+					vitesse	vitesse	periode 1e-6 segment 10 -10.87 3.7 -10.87 4.7
+					k_eps	k_eps	periode 1e-6 segment 10 -10.87 3.7 -10.87 4.7
+
+					profil_vitesse	vitesse	periode 1e6 segmentpoints 70 -1.08700000000e+01 3.70040698059e+00 -1.08700000000e+01 3.70128198875e+00 -1.08700000000e+01 3.70228824805e+00 -1.08700000000e+01 3.70344544637e+00 -1.08700000000e+01 3.70477622452e+00 -1.08700000000e+01 3.70630661938e+00 -1.08700000000e+01 3.70806657345e+00 -1.08700000000e+01 3.71009052066e+00 -1.08700000000e+01 3.71241805997e+00 -1.08700000000e+01 3.71509473021e+00 -1.08700000000e+01 3.71817290093e+00 -1.08700000000e+01 3.72171279722e+00 -1.08700000000e+01 3.72578367798e+00 -1.08700000000e+01 3.73046519085e+00 -1.08700000000e+01 3.73584893076e+00 -1.08700000000e+01 3.74204023171e+00 -1.08700000000e+01 3.74916022773e+00 -1.08700000000e+01 3.75734822307e+00 -1.08700000000e+01 3.76676441772e+00 -1.08700000000e+01 3.77759304166e+00 -1.08700000000e+01 3.79004595925e+00 -1.08700000000e+01 3.80436681445e+00 -1.08700000000e+01 3.82083579804e+00 -1.08700000000e+01 3.83977512928e+00 -1.08700000000e+01 3.86155536016e+00 -1.08700000000e+01 3.88660262553e+00 -1.08700000000e+01 3.91666666667e+00 -1.08700000000e+01 3.95000000000e+00 -1.08700000000e+01 3.98333333333e+00 -1.08700000000e+01 4.01666666667e+00 -1.08700000000e+01 4.05000000000e+00 -1.08700000000e+01 4.08333333333e+00 -1.08700000000e+01 4.11666666667e+00 -1.08700000000e+01 4.15000000000e+00 -1.08700000000e+01 4.18333333333e+00 -1.08700000000e+01 4.21666666667e+00 -1.08700000000e+01 4.25000000000e+00 -1.08700000000e+01 4.28333333333e+00 -1.08700000000e+01 4.31666666667e+00 -1.08700000000e+01 4.35000000000e+00 -1.08700000000e+01 4.38333333333e+00 -1.08700000000e+01 4.41666666667e+00 -1.08700000000e+01 4.45000000000e+00 -1.08700000000e+01 4.48333333333e+00 -1.08700000000e+01 4.51339737447e+00 -1.08700000000e+01 4.53844463984e+00 -1.08700000000e+01 4.56022487072e+00 -1.08700000000e+01 4.57916420196e+00 -1.08700000000e+01 4.59563318555e+00 -1.08700000000e+01 4.60995404075e+00 -1.08700000000e+01 4.62240695833e+00 -1.08700000000e+01 4.63323558228e+00 -1.08700000000e+01 4.64265177693e+00 -1.08700000000e+01 4.65083977227e+00 -1.08700000000e+01 4.65795976829e+00 -1.08700000000e+01 4.66415106924e+00 -1.08700000000e+01 4.66953480915e+00 -1.08700000000e+01 4.67421632202e+00 -1.08700000000e+01 4.67828720278e+00 -1.08700000000e+01 4.68182709907e+00 -1.08700000000e+01 4.68490526979e+00 -1.08700000000e+01 4.68758194003e+00 -1.08700000000e+01 4.68990947934e+00 -1.08700000000e+01 4.69193342655e+00 -1.08700000000e+01 4.69369338062e+00 -1.08700000000e+01 4.69522377548e+00 -1.08700000000e+01 4.69655455363e+00 -1.08700000000e+01 4.69771175195e+00 -1.08700000000e+01 4.69871801125e+00 -1.08700000000e+01 4.69959301941e+00
+					profil_k	k	periode 1e6 position_like profil_vitesse
+					profil_eps	eps	periode 1e6 position_like profil_vitesse
+					}
+		format lata
+		champs binaire dt_post 1e6
+					{
+					vitesse elem
+					y_plus elem
+					}
+	}
+	Sauvegarde_simple single_hdf Cas.sauv
+}
+
+EcritureLectureSpecial 0
+
+Resoudre pb
+
+System "fic=`ls pb_K_EPS*dat | sed -n 2p` ; mv $fic keps.dat ; fic=`ls pb_VITESSE*dat | sed -n 2p` ; mv $fic vitesse.dat ; rm -f pb_*.dat"
+System "extrait_coupe Cas PROFIL_VITESSE ; extrait_coupe Cas PROFIL_K ; extrait_coupe Cas PROFIL_EPS ; sed 1d Cas_PROFIL_VITESSE.coupe > profil_vitesse.dat ; sed 1d Cas_PROFIL_K.coupe > profil_k.dat ; sed 1d Cas_PROFIL_EPS.coupe > profil_eps.dat"
+
+Fin

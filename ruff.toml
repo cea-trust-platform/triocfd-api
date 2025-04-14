@@ -1,0 +1,4 @@
+exclude = [
+	"src/trioapi/trustify_gen.py",
+	"src/trioapi/trustify_gen_pyd.py"
+]
