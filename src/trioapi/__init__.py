@@ -1,4 +1,4 @@
-from trioapi.jdd import get_jdd, get_elem, write_data
+from trioapi.jdd import get_jdd, get_elem, write_data, get_subclass
 from trioapi.jdd import SCHEME, PROBLEM
 from trioapi.trustify_gen import *  # noqa: F403
 from trioapi.trustify_gen_pyd import *  # noqa: F403
@@ -9,6 +9,7 @@ from trioapi.postraitement import (
     add_probe,
     create_probe_points,
     create_probe,
+    get_probe_index_by_name,
 )
 
 __all__ = (
@@ -22,4 +23,6 @@ __all__ = (
     "add_probe",
     "create_probe_points",
     "create_probe",
+    "get_probe_index_by_name",
+    "get_subclass",
 )

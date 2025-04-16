@@ -35,7 +35,7 @@ def test_postprocess_field(request):
     pb = ta.get_elem(ds, ta.PROBLEM)
     ta.add_postprocess_field(pb, "pression_pa", "elem")
     with tempfile.TemporaryDirectory() as tmpdata:
-        ta.uwrite_data(ds, str(tmpdata) + "upwind_simplified_modified")
+        ta.write_data(ds, str(tmpdata) + "upwind_simplified_modified")
         with open(str(tmpdata) + "upwind_simplified_modified.data", "r") as f:
             contenu = f.read()
         valeur = re.search(r"vitesse elem \s*(.*?)\s*\}", contenu, re.DOTALL)

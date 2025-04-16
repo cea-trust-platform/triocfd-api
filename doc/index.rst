@@ -15,3 +15,5 @@ Hi there 👋 and welcome to the **TrioAPI documentation** page !
    :caption: Contents:
 
    modules
+
+   example/Upwind_simplified_example

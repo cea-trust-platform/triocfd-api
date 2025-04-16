@@ -1,5 +1,7 @@
 import trioapi.trustify_gen as hg
 from trustify.trust_parser import TRUSTParser, TRUSTStream
+import trioapi.trustify_gen_pyd as tgp
+import inspect
 
 PROBLEM = "pb"
 SCHEME = "sch"
@@ -68,4 +70,25 @@ def write_data(dataset, jdd_name):
     s = "".join(newStream)
     with open(jdd, "w") as f:
         f.write(s)
-    print("Data file updated with success")
+    print("Data file created with success.")
+
+
+def get_subclass(class_name):
+    """
+    Get all the subclass of a specified trustify class
+
+    Parameters
+    ----------
+    class_name :str
+        The name of the class
+
+    Returns
+    -------
+    List:
+        List of every class that are subclass
+    """
+    return [
+        cls
+        for nom, cls in inspect.getmembers(tgp, inspect.isclass)
+        if issubclass(cls, getattr(tgp, class_name)) and cls != getattr(tgp, class_name)
+    ]

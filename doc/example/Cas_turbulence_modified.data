@@ -1,0 +1,142 @@
+Dimension 2
+Pb_hydraulique_turbulent pb
+
+Domaine dom
+Scatter dom.Zones dom
+
+VEFPreP1b dis
+Lire dis { P0 P1 modif_div_face_Dirichlet 1 }
+
+Schema_Euler_implicite sch
+Lire sch
+{
+	tinit 0
+	dt_impr 1e-6
+	facsec 200
+	facsec_max 200
+	solveur implicite { solveur gmres { diag nb_it_max 3 seuil 1e-12 impr } }
+	precision_impr 8
+	residuals { relative 1 }
+}
+
+Associer pb dom
+Associer pb sch
+
+Discretiser pb dis
+
+Lire pb
+{
+	Fluide_incompressible
+	{
+		mu	champ_uniforme 1 0.0149
+		rho	champ_uniforme 1 1000
+	}
+	Navier_Stokes_turbulent
+	{
+		solveur_pression	PETSC Cholesky { }
+		convection		{ amont }
+		diffusion		{ }
+		conditions_initiales	{ vitesse champ_uniforme 2 0.2682 0 }
+		conditions_limites	{
+					Entree	frontiere_ouverte_vitesse_imposee champ_front_lu dom 2 ../PERIO/vitesse.dat
+					Sortie	frontiere_ouverte_pression_imposee champ_front_uniforme 1 0
+					Haut	paroi_fixe
+					Bas	paroi_fixe
+					}
+		modele_turbulence k_epsilon
+					{
+					transport_k_epsilon
+						{
+						disable_equation_residual 1
+						with_nu			yes
+						convection		{ amont }
+						diffusion		{ }
+						conditions_initiales 	{ k_eps field_uniform_keps_from_ud { U 0.2682 D 2 } }
+						conditions_limites	{
+									Entree	frontiere_ouverte_k_eps_impose champ_front_lu dom 2 ../PERIO/keps.dat
+									Sortie	frontiere_ouverte k_eps_ext champ_front_uniforme 2 0 0
+									Haut	paroi_fixe
+									Bas	paroi_fixe
+									}
+						sources			{ source_transport_k_eps { C1_eps 1.44 C2_eps 1.92 } }
+						}
+					Prandtl_k 1
+					Prandtl_eps 1.3
+					modele_fonc_bas_Reynolds Launder_Sharma { }
+					turbulence_paroi negligeable
+					}
+	}
+
+	Postraitement
+	{
+		definition_champs	{
+					nut_max reduction_0D { methode max source refChamp { pb_champ pb viscosite_turbulente } } vit_min reduction_0d {
+
+methode  min
+source  refchamp {
+
+nom_source  pb_champ
+pb_champ  pb vitesse
+}
+
+}
+
+					}
+		sondes			{
+					nut_max	nut_max	periode 1e-6 numero_elem_sur_maitre 0
+
+					vitesse_axe	vitesse	periode 1e-6 segment 100 -10.87 4.2 0 4.2
+					keps_axe	k_eps	periode 1e-6 segment 100 -10.87 4.2 0 4.2
+
+					U_x-6	vitesse	periode 1e-6 segment 10 -6 0 -6 4.7
+					U_x03	vitesse	periode 1e-6 segment 10  3 0  3 4.7
+					U_x06	vitesse	periode 1e-6 segment 10  6 0  6 4.7
+					U_x14	vitesse	periode 1e-6 segment 10 14 0 14 4.7
+					U_x17	vitesse	periode 1e-6 segment 10 17 0 17 4.7
+					U_x20	vitesse	periode 1e-6 segment 10 20 0 20 4.7
+					U_x24	vitesse	periode 1e-6 segment 10 24 0 24 4.7
+					U_x27	vitesse	periode 1e-6 segment 10 27 0 27 4.7
+					U_x30	vitesse	periode 1e-6 segment 10 30 0 30 4.7
+					U_x34	vitesse	periode 1e-6 segment 10 34 0 34 4.7
+					U_x40	vitesse	periode 1e-6 segment 10 40 0 40 4.7
+					U_x47	vitesse	periode 1e-6 segment 10 47 0 47 4.7
+					U_x53	vitesse	periode 1e-6 segment 10 53 0 53 4.7
+					# U_x60	vitesse	periode 1e-6 segment 10 60 0 60 4.7
+					U_x67	vitesse	periode 1e-6 segment 10 67 0 67 4.7
+					U_x74	vitesse	periode 1e-6 segment 10 74 0 74 4.7 #
+
+					ke_x-6	k_eps	periode 1e-6 position_like U_x-6
+					ke_x03	k_eps	periode 1e-6 position_like U_x03
+					ke_x06	k_eps	periode 1e-6 position_like U_x06
+					ke_x14	k_eps	periode 1e-6 position_like U_x14
+					ke_x17	k_eps	periode 1e-6 position_like U_x17
+					ke_x20	k_eps	periode 1e-6 position_like U_x20
+					ke_x24	k_eps	periode 1e-6 position_like U_x24
+					ke_x27	k_eps	periode 1e-6 position_like U_x27
+					ke_x30	k_eps	periode 1e-6 position_like U_x30
+					ke_x34	k_eps	periode 1e-6 position_like U_x34
+					ke_x40	k_eps	periode 1e-6 position_like U_x40
+					ke_x47	k_eps	periode 1e-6 position_like U_x47
+					ke_x53	k_eps	periode 1e-6 position_like U_x53 probe1 vitesse periode 0.05 points 3 0.8 2.0 1.0 1.3 1.0 0.0 probe2 pression periode 0.005 segment 50 0.0 0.8 1.0 1.2
+					# ke_x60	k_eps	periode 1e-6 position_like U_x60
+					ke_x67	k_eps	periode 1e-6 position_like U_x67
+					ke_x74	k_eps	periode 1e-6 position_like U_x74 #
+					}
+		format lata
+		champs binaire dt_post 1e6
+					{
+					vitesse elem
+					viscosite_turbulente elem
+					k_eps elem
+					pression_pa elem
+					y_plus elem pression_pa elem
+					}
+	}
+	sauvegarde single_hdf Cas.sauv
+}
+
+EcritureLectureSpecial 0
+
+Resoudre pb
+
+Fin

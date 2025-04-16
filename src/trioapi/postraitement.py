@@ -127,6 +127,33 @@ def add_postprocess_field(problem, field, localisation):
     problem.postraitement.champs.champs.append(new_field)
 
 
+def get_probe_index_by_name(problem, name_probe):
+    """
+    Get the index of a probe in the list
+
+    Parameters
+    ----------
+    problem: Pb_base
+        The problem containing the postprocessing with the probe
+
+    name_probe: str
+        The name of the probe
+
+    Return
+    ------
+    int:
+        The index of the probe in the list of probe in the postprocessing class
+    """
+    return next(
+        (
+            i
+            for i, obj in enumerate(problem.postraitement.sondes)
+            if obj.nom_sonde == name_probe
+        ),
+        None,
+    )
+
+
 ## TO DO ? :  def create_postprocessing()
 ##              definition_champs
 ##

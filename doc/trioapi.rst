@@ -36,14 +36,6 @@ trioapi.problem module
    :show-inheritance:
    :undoc-members:
 
-trioapi.trustify\_gen module
-----------------------------
-
-.. automodule:: trioapi.trustify_gen
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
 trioapi.trustify\_gen\_pyd module
 ---------------------------------
 
