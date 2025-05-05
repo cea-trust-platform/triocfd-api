@@ -12,6 +12,14 @@ trioapi.conditions module
    :show-inheritance:
    :undoc-members:
 
+trioapi.discretization module
+-----------------------------
+
+.. automodule:: trioapi.discretization
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 trioapi.jdd module
 ------------------
 
@@ -28,13 +36,6 @@ trioapi.postraitement module
    :show-inheritance:
    :undoc-members:
 
-trioapi.problem module
-----------------------
-
-.. automodule:: trioapi.problem
-   :members:
-   :show-inheritance:
-   :undoc-members:
 
 trioapi.trustify\_gen\_pyd module
 ---------------------------------

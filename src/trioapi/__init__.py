@@ -12,6 +12,18 @@ from trioapi.postraitement import (
     get_probe_index_by_name,
 )
 
+from trioapi.discretization import change_scheme
+
+from trioapi.interprete import add_object, associate_to_problem, solve_problem
+
+from trioapi.attributes import (
+    get_successive_attributes,
+    get_attributes,
+    obj_to_dict,
+    obj_to_dict_type,
+    dict_to_object_type,
+)
+
 __all__ = (
     "get_jdd",
     "get_elem",
@@ -25,4 +37,13 @@ __all__ = (
     "create_probe",
     "get_probe_index_by_name",
     "get_subclass",
+    "change_scheme",
+    "add_object",
+    "associate_to_problem",
+    "solve_problem",
+    "get_successive_attributes",
+    "get_attributes",
+    "obj_to_dict",
+    "obj_to_dict_type",
+    "dict_to_object_type",
 )

@@ -16,4 +16,8 @@ Hi there 👋 and welcome to the **TrioAPI documentation** page !
 
    modules
 
-   example/Upwind_simplified_example
+   example/Basic_scheme_modification
+
+   example/Discretization_modification
+
+   example/Postprocessing_modification
