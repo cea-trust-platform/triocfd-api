@@ -8,15 +8,15 @@ dimension 2
 Domaine dom
 
 # BEGIN MESH #
-/* Read mesh from ICEM */
-/* Read_File_Binary dom mesh.bin */
-/* Read mesh from Salome */
-/* Read_MED { domain dom file mesh.med } */
-/* Create domain and mesh from TRUST */
+# Read mesh from ICEM #
+Read_File_Binary dom mesh.bin
+# Read mesh from Salome #
+Read_MED { domain dom file mesh.med }
+# Create domain and mesh from TRUST #
 Read_file Obstacle.geo ;
 # END MESH #
 
-# BEGIN PARTITION
+# BEGIN PARTITION #
 Partition dom
 {
     /* Choose Nb_parts so to have ~ 25000 cells per processor */
@@ -24,32 +24,47 @@ Partition dom
     Larg_joint 2
     zones_name DOM
 }
-End
-END PARTITION #
+# End #
+# END PARTITION #
 
-# BEGIN SCATTER
+# BEGIN SCATTER #
 Scatter DOM.Zones dom
-END SCATTER #
+# END SCATTER #
 
 # Discretization on hexa or tetra mesh #
-VDF ma_discretisation Schema_euler_implicite sch
-Read sch {
+VDF ma_discretisation
 
-solveur  solveur_implicite_base {
+# Time scheme explicit or implicit #
+Scheme_euler_explicit sch
+Read sch
+{
+    # Time step #
+    # Initial time [s] #
+    tinit 0
+    # Min time step #
+    dt_min 5.e-3
+    # Max time step #
+    dt_max 5.e-3 # dt_min=dt_max so dt imposed #
+    # facsec such as dt = facsec * min(dt(CFL),dt_max) ; for explicit scheme facsec <= 1. By default facsec equals to 1 #
+    # facsec 0.5 #
+    # make the diffusion term in NS equation implicit : disable(0) or enable(1) #
+    diffusion_implicite 0
 
+    # Output criteria #
+    # .out files printing period #
+    dt_impr 5.e-3 # Note: small value to print at each time step #
+    # .sauv files printing period #
+    dt_sauv 100
+    periode_sauvegarde_securite_en_heures 23
+
+    # Stop if one of the following criteria is checked: #
+    # End time [s] #
+    tmax 5.0
+    # Max number of time steps #
+    # nb_pas_dt_max 3 #
+    # Convergence threshold (see .dt_ev file) #
+    seuil_statio 1.e-8
 }
-
-tinit  0.0
-tmax  5.0
-dt_min  0.005
-dt_max  5.e-3
-dt_sauv  100.0
-dt_impr  0.005
-seuil_statio  1e-08
-diffusion_implicite  0
-periode_sauvegarde_securite_en_heures  23.0
-}
-
 
 # Problem definition #
 Pb_hydraulique pb

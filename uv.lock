@@ -1596,7 +1596,7 @@ wheels = [
 
 [[package]]
 name = "trioapi"
-version = "0.1.6"
+version = "0.2.6"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },

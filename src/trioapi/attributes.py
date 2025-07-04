@@ -27,7 +27,7 @@ def get_attributes(cls):
         return attr_types
 
 
-def get_successive_attributes(cls, dict={}):
+def get_successive_attributes(cls, dict=None):
     """
     Get every attributes of class recursively
 
@@ -46,6 +46,8 @@ def get_successive_attributes(cls, dict={}):
     dict:
         dictionnary representing every attributes the key is the name of the attribute and the value is his own attributes, it stops when it is classic class or class which has no attributes
     """
+    if dict is None:
+        dict = {}
     iterator = iter(get_attributes(cls).items())
     while True:
         try:
@@ -59,48 +61,39 @@ def get_successive_attributes(cls, dict={}):
                     get_successive_attributes(value, dict[key])
                 else:
                     dict.update({key: value})
-            else:
-                if typing.get_origin(value) in [typing.Literal, list]:
-                    dict.update({key: value})
-                else:
-                    if (
-                        inspect.isclass(value.__args__[0])
-                        and value.__args__[0]
-                        not in [int, float, str, bool, list, tuple, dict, set]
-                        and typing.get_origin(value.__args__[0]) is not typing.Literal
-                        and get_attributes(value.__args__[0]) != {}
-                    ):
-                        dict.update({key: get_attributes(value.__args__[0])})
-                        get_successive_attributes(value.__args__[0], dict[key])
-                    else:
-                        if (
-                            value.__args__[0]
-                            in [int, float, str, bool, list, tuple, dict, set]
-                            or typing.get_origin(value.__args__[0]) is typing.Literal
-                        ):
-                            dict.update({key: value.__args__[0]})
-                        if typing.get_origin(value.__args__[0]) is typing.Annotated:
-                            dict.update(
-                                {
-                                    key: [
-                                        get_attributes(
-                                            value.__args__[0].__args__[0].__args__[0]
-                                        )
-                                    ]
-                                }
-                            )
-                            get_successive_attributes(
-                                value.__args__[0].__args__[0].__args__[0], dict[key][0]
-                            )
-                        if typing.get_origin(value) is typing.Annotated:
-                            dict.update(
-                                {key: [get_attributes(value.__args__[0].__args__[0])]}
-                            )
-                            get_successive_attributes(
-                                value.__args__[0].__args__[0], dict[key][0]
-                            )
-                        if get_attributes(value.__args__[0]) == {}:
-                            dict.update({key: value.__args__[0]})
+            elif typing.get_origin(value) in [typing.Literal, list]:
+                dict.update({key: value})
+            elif (
+                inspect.isclass(value.__args__[0])
+                and value.__args__[0]
+                not in [int, float, str, bool, list, tuple, dict, set]
+                and typing.get_origin(value.__args__[0]) is not typing.Literal
+                and get_attributes(value.__args__[0]) != {}
+            ):
+                dict.update({key: get_attributes(value.__args__[0])})
+                get_successive_attributes(value.__args__[0], dict[key])
+            elif (
+                value.__args__[0] in [int, float, str, bool, list, tuple, dict, set]
+                or typing.get_origin(value.__args__[0]) is typing.Literal
+            ):
+                dict.update({key: value.__args__[0]})
+            elif (
+                typing.get_origin(value) is typing.Annotated
+                and typing.get_origin(value.__args__[0]) is list
+            ):
+                dict.update({key: [value.__args__[0].__args__[0]]})
+            elif typing.get_origin(value.__args__[0]) is typing.Annotated:
+                dict.update(
+                    {key: [get_attributes(value.__args__[0].__args__[0].__args__[0])]}
+                )
+                get_successive_attributes(
+                    value.__args__[0].__args__[0].__args__[0], dict[key][0]
+                )
+            elif typing.get_origin(value) is typing.Annotated:
+                dict.update({key: [get_attributes(value.__args__[0].__args__[0])]})
+                get_successive_attributes(value.__args__[0].__args__[0], dict[key][0])
+            elif get_attributes(value.__args__[0]) == {}:
+                dict.update({key: value.__args__[0]})
         except StopIteration:
             break
     return dict
@@ -241,3 +234,43 @@ def dict_to_object_type(list_attr):
         elif value is not None:
             setattr(obj, key, value)
     return obj
+
+
+def extract_true_type(field_info):
+    """
+    Extracts the underlying base type from a FieldInfo, and indicates whether it was a list.
+
+    Returns
+    -------
+    tuple: (base_type, is_list)
+        - base_type : the core type (e.g., Corps_postraitement)
+        - is_list   : boolean indicating if it was a list[base_type]
+    """
+    annotation = field_info.annotation
+    is_list = False
+
+    def unwrap(annotation):
+        nonlocal is_list
+
+        while True:
+            origin = typing.get_origin(annotation)
+            args = typing.get_args(annotation)
+
+            if origin is typing.Annotated:
+                annotation = args[0]
+
+            elif origin is typing.Union:
+                non_none_args = [arg for arg in args if arg is not type(None)]
+                annotation = non_none_args[0] if non_none_args else None
+
+            elif origin in (list, typing.List):
+                is_list = True
+                annotation = args[0] if args else list
+
+            else:
+                break
+
+        return annotation
+
+    base_type = unwrap(annotation)
+    return base_type, is_list

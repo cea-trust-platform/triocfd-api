@@ -43,7 +43,7 @@ def create_probe_points(coos_points_list):
 
     Parameters
     ----------
-    coos_points_list: list
+    coos_points_list: List[List[float]]
         The list of the coordinates [x,y] of each points
 
     Returns
@@ -64,13 +64,13 @@ def create_probe_segment(nbr_points, coos_start_point, coos_end_point):
 
     Parameters
     ----------
-    nbre_points: int
+    nbr_points: int
         The number of points of segment
 
-    coos_start_point: list
+    coos_start_point: List[Float]
         The list corresponding to the coordinates of the starting point
 
-    coos_end_point: list
+    coos_end_point: List[float]
         The list corresponding to the coordinates of the ending point
 
     Returns
@@ -104,9 +104,36 @@ def add_probe(problem, probe):
     problem.post_processing.probes.append(probe)
 
 
+def create_multiple_probes(problem, coos_points_list, period, fields_list):
+    """
+    Create multiple probes with the same points and period for each specified field.
+
+    Parameters
+    ----------
+    problem: Pb_base
+        The problem to which we want to add a probe
+
+    coos_points_list: List[List[float]]
+        The list of the coordinates [x,y] of each points
+
+    period: float
+        Period value. Every prd seconds, the field value calculated at the previous time step is written to the nom_sonde.son file
+
+    fields_list: List[str]
+        The list of the names of the sampled fields
+    """
+    points_list = create_probe_points(coos_points_list=coos_points_list)
+
+    for field in fields_list:
+        new_probe = create_probe(
+            "sonde_" + str(field), None, field, period, points_list
+        )
+        add_probe(problem, new_probe)
+
+
 def add_postprocess_field(problem, field, localisation):
     """
-    Add a field to be post-processed to the ist of definition champ of the problem
+    Add a field to be post-processed to the list of definition field of the problem
 
     Parameters
     ----------
@@ -118,13 +145,126 @@ def add_postprocess_field(problem, field, localisation):
 
     localisation: Literal["elem","som","faces"]
         Localisation of post-processed field values: The two available values are elem, som, or faces (LATA format only) used respectively to select field values at mesh centres (CHAMPMAILLE type field in the lml file) or at mesh nodes (CHAMPPOINT type field in the lml file). If no selection is made, localisation is set to som by default.
-
-    Returns
-    -------
-
     """
     new_field = hg.Champ_a_post(champ=field, localisation=localisation)
     problem.postraitement.champs.champs.append(new_field)
+
+
+def add_multiple_postprocess_fields(problem, fields_list, localisation):
+    """
+    Add several fields to be post-processed with the same localisation to the list of definition field of the problem
+
+    Parameters
+    ----------
+    problem: Pb_base
+        The problem we want to modify
+
+    fields_list: List[str]
+        The list of the names of the post-processed fields
+
+    localisation: Literal["elem","som","faces"]
+        Localisation of post-processed field values: The two available values are elem, som, or faces (LATA format only) used respectively to select field values at mesh centres (CHAMPMAILLE type field in the lml file) or at mesh nodes (CHAMPPOINT type field in the lml file). If no selection is made, localisation is set to som by default.
+    """
+    for field in fields_list:
+        new_field = hg.Champ_a_post(champ=field, localisation=localisation)
+        problem.postraitement.champs.champs.append(new_field)
+
+
+def create_field(problem, format, period_type, period):
+    """
+    Create a field's write mode
+
+    Parameters
+    ----------
+    problem: Pb_base
+        The problem we want to modify
+
+    format: Literal["binaire","formatte"]
+        Type of file ("binaire", "formatte" or None)
+
+    period_type: Literal["dt_post","nb_pas_dt_post"]
+        Keyword to set the kind of the field's write frequency. Either a time period or a time step period. ("dt_post" or "nb_pas_dt_post")
+
+    period: str
+        Value of the period which can be like (2.*t).
+    """
+    new_field = hg.Champs_posts(
+        format=format, mot=period_type, period=period, champs=[]
+    )
+    problem.postraitement.champs = new_field
+
+
+def create_statistics(problem, period_type, period, list_stat_post=[]):
+    """
+    Create a statistic's write mode
+
+    Parameters
+    ----------
+    problem: Pb_base
+        The problem we want to modify
+
+    period_type: Literal["dt_post","nb_pas_dt_post"]
+        Keyword to set the kind of the field's write frequency. Either a time period or a time step period. ("dt_post" or "nb_pas_dt_post")
+
+    period: str
+        Value of the period which can be like (2.*t).
+
+    list_stat_post: List[Stat_post_deriv]
+        Post-processing for statistics
+    """
+    new_statistics = hg.Stats_posts(
+        mot=period_type, period=period, champs=list_stat_post
+    )
+    problem.postraitement.statistiques = new_statistics
+
+
+def add_postprocess_statistic(problem, stat_to_postprocess):
+    """
+    Add a statistic to be post-processed to the list of definition field of the problem
+
+    Parameters
+    ----------
+    problem: Pb_base
+        The problem we want to modify
+
+    stat_to_postprocess: Stat_post_deriv
+        The statistic we want to postprocess
+    """
+    problem.postraitement.statistiques.champs.append(stat_to_postprocess)
+
+
+def add_multiple_average_statistic(problem, fields_list):
+    """
+    Add a list of statistic for different field to calculate its average over time
+
+    Parameters
+    ----------
+    problem: Pb_base
+        The problem we want to modify
+
+    fields_list: List[str]
+        Every name of the fields on which statistical analysis will be performed
+    """
+    for field in fields_list:
+        new_average_stat = hg.Stat_post_moyenne(field=field)
+        problem.postraitement.statistiques.champs.append(new_average_stat)
+
+
+def add_multiple_standard_deviation_statistic(problem, fields_list):
+    """
+    Add a list of statistic for different field to calculate its standard deviation (statistic rms)
+
+    Parameters
+    ----------
+    problem: Pb_base
+        The problem we want to modify
+
+    fields_list: List[str]
+        Every name of the fields on which statistical analysis will be performed
+    """
+    for field in fields_list:
+        new_average_stat = hg.Stat_post_ecart_type(field=field)
+        problem.postraitement.statistiques.champs.append(new_average_stat)
 
 
 def get_probe_index_by_name(problem, name_probe):

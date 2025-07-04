@@ -1,4 +1,14 @@
-from trioapi.jdd import get_jdd, get_elem, write_data, get_subclass
+from trioapi.jdd import (
+    get_jdd,
+    get_elem,
+    write_data,
+    get_subclass,
+    get_read_objects,
+    get_description_as_dict,
+    get_read_pb,
+    get_read_sch,
+    get_read_dis,
+)
 from trioapi.jdd import SCHEME, PROBLEM
 from trioapi.trustify_gen import *  # noqa: F403
 from trioapi.trustify_gen_pyd import *  # noqa: F403
@@ -10,11 +20,29 @@ from trioapi.postraitement import (
     create_probe_points,
     create_probe,
     get_probe_index_by_name,
+    create_field,
+    create_statistics,
+    add_postprocess_statistic,
+    create_multiple_probes,
+    add_multiple_postprocess_fields,
+    add_multiple_average_statistic,
+    add_multiple_standard_deviation_statistic,
 )
 
 from trioapi.discretization import change_scheme
 
-from trioapi.interprete import add_object, associate_to_problem, solve_problem
+from trioapi.interprete import (
+    add_object,
+    associate_to_problem,
+    solve_problem,
+    change_dimension,
+    add_declaration_object,
+    change_declaration_object,
+    get_maillage,
+    get_mesh,
+    get_partition,
+    get_scatter,
+)
 
 from trioapi.attributes import (
     get_successive_attributes,
@@ -22,6 +50,7 @@ from trioapi.attributes import (
     obj_to_dict,
     obj_to_dict_type,
     dict_to_object_type,
+    extract_true_type,
 )
 
 __all__ = (
@@ -46,4 +75,24 @@ __all__ = (
     "obj_to_dict",
     "obj_to_dict_type",
     "dict_to_object_type",
+    "get_read_objects",
+    "create_field",
+    "create_statistics",
+    "add_postprocess_statistic",
+    "get_description_as_dict",
+    "extract_true_type",
+    "create_multiple_probes",
+    "add_multiple_postprocess_fields",
+    "add_multiple_average_statistic",
+    "add_multiple_standard_deviation_statistic",
+    "get_read_pb",
+    "get_read_sch",
+    "get_read_dis",
+    "change_dimension",
+    "add_declaration_object",
+    "change_declaration_object",
+    "get_maillage",
+    "get_mesh",
+    "get_partition",
+    "get_scatter",
 )

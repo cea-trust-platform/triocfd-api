@@ -2,12 +2,14 @@ import trioapi.trustify_gen as hg
 from trustify.trust_parser import TRUSTParser, TRUSTStream
 import trioapi.trustify_gen_pyd as tgp
 import inspect
+from importlib import resources
+import os
 
 PROBLEM = "pb"
 SCHEME = "sch"
 
 
-def get_jdd(jdd_name):
+def get_jdd(jdd_name, repository="trioapi.data"):
     """
     Get the JDD
 
@@ -18,13 +20,16 @@ def get_jdd(jdd_name):
     jdd_name: str
         The name corresponding to an existing jdd
 
+    repository: str
+        The name of the repository
+
     Returns
     -------
     Dataset:
         Pydantic class corresponding to the jdd in python format
     """
-    jdd = jdd_name + ".data"
-    with open(jdd) as f:
+    jdd = f"{jdd_name}.data"
+    with resources.files(repository).joinpath(jdd).open("r") as f:
         data_ex = f.read()
     tp = TRUSTParser()
     tp.tokenize(data_ex)
@@ -53,7 +58,7 @@ def get_elem(dataset, type_elem):
     return dataset.get(type_elem)
 
 
-def write_data(dataset, jdd_name):
+def write_data(dataset, jdd_name, repository=None):
     """
     Write the dataset in a specified data file
 
@@ -64,12 +69,21 @@ def write_data(dataset, jdd_name):
 
     jdd_name: str
         The name corresponding to the data file in which the dataset will be written
+
+    repository: str
+        The name of the repository
     """
-    jdd = jdd_name + ".data"
+    jdd = f"{jdd_name}.data"
     newStream = dataset.toDatasetTokens()
     s = "".join(newStream)
-    with open(jdd, "w") as f:
-        f.write(s)
+
+    if repository is not None:
+        complete_path = os.path.join(repository, jdd)
+        with open(complete_path, "w") as f:
+            f.write(s)
+    else:
+        with open(jdd, "w") as f:
+            f.write(s)
     print("Data file created with success.")
 
 
@@ -92,3 +106,99 @@ def get_subclass(class_name):
         for nom, cls in inspect.getmembers(tgp, inspect.isclass)
         if issubclass(cls, getattr(tgp, class_name)) and cls != getattr(tgp, class_name)
     ]
+
+
+def get_read_objects(dataset):
+    """
+    Get all the object identifier of the dataset which have been Read in the data file
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset
+
+    Returns
+    -------
+    List:
+        List of every object identifier that have been Read
+    """
+    items_list = []
+    for key, value in dataset._declarations.items():
+        if value[1] > 0:
+            items_list.append(key)
+    return items_list
+
+
+def get_read_pb(dataset):
+    """
+    Get all the pb of the dataset which have been Read in the data file
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset
+
+    Returns
+    -------
+    List:
+        List of tuple (identifier, type) of every problem of the dataset
+    """
+    items_list = []
+    for key, value in dataset._declarations.items():
+        if value[1] > 0 and value[0].ze_type in get_subclass(tgp.Pb_base.__name__):
+            items_list.append([key, value[0].ze_type])
+    return items_list
+
+
+def get_read_sch(dataset):
+    """
+    Get all the scheme of the dataset which have been Read in the data file
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset
+
+    Returns
+    -------
+    List:
+        List of tuple (identifier, type) of every scheme of the dataset
+    """
+    items_list = []
+    for key, value in dataset._declarations.items():
+        if value[1] > 0 and value[0].ze_type in get_subclass(
+            tgp.Schema_temps_base.__name__
+        ):
+            items_list.append([key, value[0].ze_type])
+    return items_list
+
+
+def get_read_dis(dataset):
+    items_list = []
+    for key, value in dataset._declarations.items():
+        if value[0].ze_type in get_subclass("Discretisation_base"):
+            items_list.append([key, value[0].ze_type])
+    return items_list
+
+
+def get_description_as_dict(type_object):
+    """
+    Get all the description of the attributes of the type as a dict format
+
+    Parameters
+    ----------
+    type_object: class
+        The corresponding object
+
+    Returns
+    -------
+    Dict:
+        Dict of every description for each attributes
+    """
+    dict_description = {}
+    if type_object is not None:
+        for name, field in type_object.model_fields.items():
+            if field.description:
+                desc = field.description.replace("\n", " ").strip()
+                dict_description.update({str(name): str(desc)})
+    return dict_description
