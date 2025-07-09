@@ -146,7 +146,7 @@ def get_read_pb(dataset):
     items_list = []
     for key, value in dataset._declarations.items():
         if value[1] > 0 and value[0].ze_type in get_subclass(tgp.Pb_base.__name__):
-            items_list.append([key, value[0].ze_type])
+            items_list.append([key, dataset.get(key)])
     return items_list
 
 
@@ -169,11 +169,11 @@ def get_read_sch(dataset):
         if value[1] > 0 and value[0].ze_type in get_subclass(
             tgp.Schema_temps_base.__name__
         ):
-            items_list.append([key, value[0].ze_type])
+            items_list.append([key, dataset.get(key)])
     return items_list
 
 
-def get_read_dis(dataset):
+def get_dis(dataset):
     items_list = []
     for key, value in dataset._declarations.items():
         if value[0].ze_type in get_subclass("Discretisation_base"):

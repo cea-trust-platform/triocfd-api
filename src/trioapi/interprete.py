@@ -161,7 +161,7 @@ def add_declaration_object(dataset, obj, obj_identifier):
 
 def change_declaration_object(dataset, identifier, field_to_modify, new_field_value):
     """
-    Change an object which is not read (only declaration) to the dataset.
+    Change an object which is not read (only declaration) in the dataset.
 
     Parameters
     ----------
@@ -178,12 +178,46 @@ def change_declaration_object(dataset, identifier, field_to_modify, new_field_va
         The new value of the field
     """
     setattr(dataset._declarations[identifier][0], field_to_modify, new_field_value)
-    index = 0
-    while not (
-        isinstance(dataset.entries[index], tgp.Declaration)
-        and dataset.entries[index].identifier != identifier
-    ):
-        index += 1
+    if field_to_modify == "identifier":
+        dataset._declarations[new_field_value] = dataset._declarations.pop(identifier)
+        for entry in dataset.entries:
+            if isinstance(entry, tgp.Solve) and entry.pb == identifier:
+                entry.pb = new_field_value
+            elif isinstance(entry, tgp.Associate):
+                if entry.objet_1 == identifier:
+                    entry.objet_1 = new_field_value
+                elif entry.objet_2 == identifier:
+                    entry.objet_2 = new_field_value
+
+
+def change_read_object(dataset, identifier, field_to_modify, new_field_value):
+    """
+    Change an object which is read in the dataset.
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset.
+
+    identifier: str
+        The current identifier of the object in the dataset
+
+    field_to_modify: Literal["identifier","obj"]
+        The field of the object which will be modified
+
+    new_field_value: ?
+        The new value of the field
+    """
+    index = dataset._declarations[identifier][1]
+    if field_to_modify == "obj":
+        declaration_field_to_modify = "ze_type"
+        declaration_new_field = type(new_field_value)
+    else:
+        declaration_field_to_modify = field_to_modify
+        declaration_new_field = new_field_value
+    change_declaration_object(
+        dataset, identifier, declaration_field_to_modify, declaration_new_field
+    )
     setattr(dataset.entries[index], field_to_modify, new_field_value)
 
 
@@ -271,3 +305,70 @@ def get_scatter(dataset):
         if isinstance(i, tgp.Scatter):
             items_list.append(i)
     return items_list
+
+
+def get_dimension(dataset):
+    """
+    Return the dimension of the dataset
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset.
+
+    Returns
+    -------
+    Int:
+        The dimension of the dataset
+    """
+    index = 0
+    while not isinstance(dataset.entries[index], tgp.Dimension):
+        index += 1
+    return dataset.entries[index].dim
+
+
+def get_domain(dataset):
+    """
+    Return the domains of the dataset
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset.
+
+    Returns
+    -------
+    List[str]:
+        The names of the domains of the dataset
+    """
+    items_list = []
+    for i, decl in dataset._declarations.items():
+        if decl[0].ze_type is tgp.Domaine:
+            items_list.append(i)
+
+    return items_list
+
+
+def change_type_object(initial_object, new_type):
+    """
+    Return the object with a new type with the common attributes between the initial one and the new one
+
+    Parameters
+    ----------
+    initial_object: Pydantic object
+        The corresponding object
+
+    new_type: str
+        The name of the type in which we want to transform the object
+
+    Returns
+    -------
+    Pydantic object:
+        The object with a new_type
+    """
+    new_obj = getattr(tgp, new_type)()
+    common_attr = set(new_obj.__dict__) & set(type(initial_object)().__dict__)
+    common_attr.remove("_parser")
+    for j in common_attr:
+        setattr(new_obj, j, getattr(initial_object, j))
+    return new_obj

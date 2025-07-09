@@ -7,7 +7,7 @@ from trioapi.jdd import (
     get_description_as_dict,
     get_read_pb,
     get_read_sch,
-    get_read_dis,
+    get_dis,
 )
 from trioapi.jdd import SCHEME, PROBLEM
 from trioapi.trustify_gen import *  # noqa: F403
@@ -38,10 +38,14 @@ from trioapi.interprete import (
     change_dimension,
     add_declaration_object,
     change_declaration_object,
+    change_read_object,
     get_maillage,
     get_mesh,
     get_partition,
     get_scatter,
+    get_dimension,
+    get_domain,
+    change_type_object,
 )
 
 from trioapi.attributes import (
@@ -87,12 +91,16 @@ __all__ = (
     "add_multiple_standard_deviation_statistic",
     "get_read_pb",
     "get_read_sch",
-    "get_read_dis",
+    "get_dis",
     "change_dimension",
     "add_declaration_object",
     "change_declaration_object",
+    "change_read_object",
     "get_maillage",
     "get_mesh",
     "get_partition",
     "get_scatter",
+    "get_dimension",
+    "get_domain",
+    "change_type_object",
 )
