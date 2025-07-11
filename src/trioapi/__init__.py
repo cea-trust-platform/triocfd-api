@@ -8,6 +8,7 @@ from trioapi.jdd import (
     get_read_pb,
     get_read_sch,
     get_dis,
+    get_entry_index,
 )
 from trioapi.jdd import SCHEME, PROBLEM
 from trioapi.trustify_gen import *  # noqa: F403
@@ -46,6 +47,7 @@ from trioapi.interprete import (
     get_dimension,
     get_domain,
     change_type_object,
+    add_read_object,
 )
 
 from trioapi.attributes import (
@@ -55,6 +57,12 @@ from trioapi.attributes import (
     obj_to_dict_type,
     dict_to_object_type,
     extract_true_type,
+)
+
+from trioapi.deletion import (
+    delete_object,
+    delete_read_object,
+    delete_declaration_object,
 )
 
 __all__ = (
@@ -103,4 +111,9 @@ __all__ = (
     "get_dimension",
     "get_domain",
     "change_type_object",
+    "add_read_object",
+    "get_entry_index",
+    "delete_object",
+    "delete_read_object",
+    "delete_declaration_object",
 )

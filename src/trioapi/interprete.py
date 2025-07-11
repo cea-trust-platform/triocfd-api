@@ -188,6 +188,11 @@ def change_declaration_object(dataset, identifier, field_to_modify, new_field_va
                     entry.objet_1 = new_field_value
                 elif entry.objet_2 == identifier:
                     entry.objet_2 = new_field_value
+            elif isinstance(entry, tgp.Discretize):
+                if entry.problem_name == identifier:
+                    entry.problem_name = new_field_value
+                elif entry.dis == identifier:
+                    entry.dis = new_field_value
 
 
 def change_read_object(dataset, identifier, field_to_modify, new_field_value):
@@ -372,3 +377,22 @@ def change_type_object(initial_object, new_type):
     for j in common_attr:
         setattr(new_obj, j, getattr(initial_object, j))
     return new_obj
+
+
+def add_read_object(dataset, obj):
+    """
+    Add an object to the dataset.
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset.
+
+    obj: Objet_u
+        The corresponding object.
+    """
+
+    index = len(dataset.entries)
+    while isinstance(dataset.entries[index - 1], (tgp.Fin, tgp.Solve)):
+        index -= 1
+    dataset.entries.insert(index, obj)

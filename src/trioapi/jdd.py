@@ -202,3 +202,30 @@ def get_description_as_dict(type_object):
                 desc = field.description.replace("\n", " ").strip()
                 dict_description.update({str(name): str(desc)})
     return dict_description
+
+
+def get_entry_index(dataset, created_object):
+    """
+    Get the index of an object in the dataset entries
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset
+
+    created_object: Pydantic object
+        The actual object for which we want to know the index in the dataset entries
+
+    Returns
+    -------
+    Int:
+        Index of the object in the entries of the dataset
+    """
+
+    index = 0
+    while index < len(dataset.entries) and dataset.entries[index] != created_object:
+        index += 1
+    if index == len(dataset.entries):
+        return -1
+    else:
+        return index
