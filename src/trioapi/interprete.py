@@ -354,6 +354,75 @@ def get_domain(dataset):
     return items_list
 
 
+def get_solved_problems(dataset):
+    """
+    Return the solved problems of the dataset
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset.
+
+    Returns
+    -------
+    List[str]:
+        The identifiers of the problems solved of the dataset
+    """
+
+    items_list = []
+    for i in dataset.entries:
+        if isinstance(i, tgp.Solve):
+            items_list.append(i.pb)
+
+    return items_list
+
+
+def get_associations(dataset):
+    """
+    Return the identifer of the associed objects of the dataset
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset.
+
+    Returns
+    -------
+    List[str]:
+        The identifiers of theassocied objects of the dataset
+    """
+
+    items_list = []
+    for i in dataset.entries:
+        if isinstance(i, tgp.Associate):
+            items_list.append([i.objet_1, i.objet_2])
+
+    return items_list
+
+
+def get_discretize(dataset):
+    """
+    Return the identifer of the discretized objects of the dataset
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset.
+
+    Returns
+    -------
+    List[str]:
+        The identifiers of the discretized objects of the dataset
+    """
+
+    items_list = []
+    for i in dataset.entries:
+        if isinstance(i, tgp.Discretize):
+            items_list.append([i.problem_name, i.dis])
+
+    return items_list
+
+
 def change_type_object(initial_object, new_type):
     """
     Return the object with a new type with the common attributes between the initial one and the new one

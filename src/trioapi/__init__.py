@@ -46,6 +46,9 @@ from trioapi.interprete import (
     get_scatter,
     get_dimension,
     get_domain,
+    get_solved_problems,
+    get_associations,
+    get_discretize,
     change_type_object,
     add_read_object,
 )
@@ -116,4 +119,7 @@ __all__ = (
     "delete_object",
     "delete_read_object",
     "delete_declaration_object",
+    "get_solved_problems",
+    "get_associations",
+    "get_discretize",
 )
