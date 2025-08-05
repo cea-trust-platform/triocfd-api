@@ -51,6 +51,7 @@ from trioapi.interprete import (
     get_discretize,
     change_type_object,
     add_read_object,
+    get_coupled_problems,
 )
 
 from trioapi.attributes import (
@@ -122,4 +123,5 @@ __all__ = (
     "get_solved_problems",
     "get_associations",
     "get_discretize",
+    "get_coupled_problems",
 )

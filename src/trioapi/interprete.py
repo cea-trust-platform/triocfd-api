@@ -465,3 +465,24 @@ def add_read_object(dataset, obj):
     while isinstance(dataset.entries[index - 1], (tgp.Fin, tgp.Solve)):
         index -= 1
     dataset.entries.insert(index, obj)
+
+
+def get_coupled_problems(dataset):
+    """
+    Return the identifer of every coupled problems of the dataset
+
+    Parameters
+    ----------
+    dataset: Dataset
+        The corresponding dataset.
+
+    Returns
+    -------
+    List[str]:
+        The identifiers of every coupled problems of the dataset
+    """
+    items_list = []
+    for identifier, item in dataset._declarations.items():
+        if item[0].ze_type is tgp.Coupled_problem:
+            items_list.append(identifier)
+    return items_list
