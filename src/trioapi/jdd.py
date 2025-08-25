@@ -2,7 +2,8 @@ import trioapi.trustify_gen as hg
 from trustify.trust_parser import TRUSTParser, TRUSTStream
 import trioapi.trustify_gen_pyd as tgp
 import inspect
-from importlib import resources
+from pathlib import Path
+import importlib.resources as resources
 import os
 
 PROBLEM = "pb"
@@ -28,9 +29,23 @@ def get_jdd(jdd_name, repository="trioapi.data"):
     Dataset:
         Pydantic class corresponding to the jdd in python format
     """
-    jdd = f"{jdd_name}.data"
-    with resources.files(repository).joinpath(jdd).open("r") as f:
-        data_ex = f.read()
+    jdd_filename = f"{jdd_name}.data"
+
+    try:
+        # Verify qi c'est un dossier valide
+        repo_path = Path(repository)
+        if repo_path.exists() and repo_path.is_dir():
+            jdd_path = repo_path / jdd_filename
+            with open(jdd_path, "r") as f:
+                data_ex = f.read()
+        else:
+            # Si c'est le package trioapi.data
+            with resources.files(repository).joinpath(jdd_filename).open("r") as f:
+                data_ex = f.read()
+    except Exception as e:
+        raise FileNotFoundError(
+            f"Could not load JDD file '{jdd_filename}' from '{repository}': {e}"
+        )
     tp = TRUSTParser()
     tp.tokenize(data_ex)
     stream = TRUSTStream(tp)
